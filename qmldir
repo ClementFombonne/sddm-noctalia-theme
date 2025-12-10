@@ -1,2 +1,3 @@
 singleton Color 1.0 Color.qml
 singleton Style 1.0 Style.qml
+singleton IconsTabler 1.0 IconsTabler.qml
