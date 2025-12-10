@@ -133,25 +133,20 @@ RowLayout {
 
                         var rootItem = parentComboBox.parent;
 
-                        // A. ALWAYS Update UI first (Change index and close)
                         parentComboBox.currentIndex = itemIndex;
                         parentComboBox.popup.close();
 
-                        // B. Handle Data Extraction
+                        if (rootItem) {
+                            rootItem.activated(itemIndex);
+                        }
+
                         var keyToEmit = "";
 
-                        // Case 1: C++ Model / ListModel (Direct access to role)
-                        // The variable 'key' is injected directly into the scope
                         if (typeof key !== "undefined") {
                             keyToEmit = key;
-                        } else
-                        // Case 2: Javascript Array of Objects (standard Qt way)
-                        // Arrays expose data via 'modelData'
-                        if (typeof modelData !== "undefined" && modelData.key) {
+                        } else if (typeof modelData !== "undefined" && modelData.key) {
                             keyToEmit = modelData.key;
-                        } else
-                        // Case 3: Fallback to manual lookup
-                        {
+                        } else {
                             if (rootItem && typeof rootItem.getItem == 'function') {
                                 var item = rootItem.getItem(itemIndex);
                                 if (item && item.key != undefined) {

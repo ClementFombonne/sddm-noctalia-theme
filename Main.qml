@@ -12,7 +12,10 @@ FocusScope {
     height: 1080
 
     // --- LOGIC VARIABLES ---
-    property int currentSessionIndex: sessionModel.lastIndex
+    property int currentSessionIndex: 0
+    Component.onCompleted: {
+        currentSessionIndex = sessionModel.lastIndex;
+    }
     property bool uiEnabled: true
     property string loginErrorMessage: ""
     property string currentTime: Qt.formatDateTime(new Date(), "hh:mm")
@@ -866,10 +869,10 @@ FocusScope {
                     NComboBox {
                         Layout.fillWidth: true
                         model: sessionModel
-                        currentIndex: sessionModel.lastIndex
+                        currentIndex: root.currentSessionIndex
                         onActivated: index => {
-                            sessionModel.lastIndex = index;
                             root.currentSessionIndex = index;
+                            console.log("Session switched to index:", root.currentSessionIndex);
                             passwordComponent.forceFocus();
                         }
                         onPopupClosed: passwordComponent.forceFocus()
