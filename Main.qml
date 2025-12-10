@@ -3,7 +3,8 @@ import QtQuick.Layouts
 import SddmComponents 2.0 as Sddm
 import QtQuick.Controls
 
-import "./widgets"
+import "./Widgets/"
+import "./Commons/"
 
 FocusScope {
     id: root
@@ -60,7 +61,7 @@ FocusScope {
     // --- LOAD FONT ---
     FontLoader {
         id: iconFontLoader
-        source: "assets/font/tabler-icons.ttf"
+        source: "Assets/Fonts/tabler/tabler-icons.ttf"
     }
     property string iconFont: iconFontLoader.name
     // --- CLOCK TIMER ---
@@ -85,19 +86,19 @@ FocusScope {
         gradient: Gradient {
             GradientStop {
                 position: 0.0
-                color: Qt.alpha(NColors.mShadow, 0.8)
+                color: Qt.alpha(Color.mShadow, 0.8)
             }
             GradientStop {
                 position: 0.3
-                color: Qt.alpha(NColors.mShadow, 0.4)
+                color: Qt.alpha(Color.mShadow, 0.4)
             }
             GradientStop {
                 position: 0.7
-                color: Qt.alpha(NColors.mShadow, 0.5)
+                color: Qt.alpha(Color.mShadow, 0.5)
             }
             GradientStop {
                 position: 1.0
-                color: Qt.alpha(NColors.mShadow, 0.9)
+                color: Qt.alpha(Color.mShadow, 0.9)
             }
         }
     }
@@ -107,9 +108,9 @@ FocusScope {
         anchors.fill: parent
         visible: true
 
-        property color cornerColor: NColors.black // Qt.alpha(NColors.mSurface, config.backgroundOpacity)
-        property real cornerRadius: NStyle.screenRadius
-        property real cornerSize: NStyle.screenRadius
+        property color cornerColor: Color.black // Qt.alpha(Color.mSurface, config.backgroundOpacity)
+        property real cornerRadius: Style.screenRadius
+        property real cornerSize: Style.screenRadius
 
         // Top-left concave corner
         Canvas {
@@ -255,9 +256,9 @@ FocusScope {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: 100
-            radius: NStyle.radiusL
-            color: NColors.mSurface
-            border.color: Qt.alpha(NColors.mOutline, 0.2)
+            radius: Style.radiusL
+            color: Color.mSurface
+            border.color: Qt.alpha(Color.mOutline, 0.2)
             border.width: 1
 
             RowLayout {
@@ -274,18 +275,18 @@ FocusScope {
                     // User Name
                     NText {
                         text: "Welcome"
-                        pointSize: NStyle.fontSizeXXL
-                        font.weight: NStyle.fontWeightMedium
-                        color: NColors.mOnSurface
+                        pointSize: Style.fontSizeXXL
+                        font.weight: Style.fontWeightMedium
+                        color: Color.mOnSurface
                         horizontalAlignment: Text.AlignLeft
                     }
 
                     // Date
                     NText {
                         text: root.currentDate
-                        pointSize: NStyle.fontSizeXL
-                        font.weight: NStyle.fontWeightMedium
-                        color: NColors.mOnSurfaceVariant
+                        pointSize: Style.fontSizeXL
+                        font.weight: Style.fontWeightMedium
+                        color: Color.mOnSurfaceVariant
                         horizontalAlignment: Text.AlignLeft
                     }
                 }
@@ -299,11 +300,11 @@ FocusScope {
                     Layout.preferredWidth: 70
                     Layout.preferredHeight: 70
                     Layout.alignment: Qt.AlignVCenter
-                    backgroundColor: NColors.mSurface
-                    clockColor: NColors.mOnSurface
-                    secondHandColor: NColors.mPrimary
-                    hoursFontSize: NStyle.fontSizeL
-                    minutesFontSize: NStyle.fontSizeL
+                    backgroundColor: Color.mSurface
+                    clockColor: Color.mOnSurface
+                    secondHandColor: Color.mPrimary
+                    hoursFontSize: Style.fontSizeL
+                    minutesFontSize: Style.fontSizeL
                 }
             }
         }
@@ -314,14 +315,14 @@ FocusScope {
             visible: root.loginErrorMessage !== ""
             opacity: visible ? 1.0 : 0.0
 
-            width: errorRowLayout.implicitWidth + NStyle.marginXL * 1.5
+            width: errorRowLayout.implicitWidth + Style.marginXL * 1.5
             height: 50
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: (config.compact == "true" ? 280 : 360) * NStyle.uiScaleRatio
-            radius: NStyle.radiusL
-            color: NColors.mError
-            border.color: NColors.mError
+            anchors.bottomMargin: (config.compact == "true" ? 280 : 360) * Style.uiScaleRatio
+            radius: Style.radiusL
+            color: Color.mError
+            border.color: Color.mError
             border.width: 1
 
             RowLayout {
@@ -331,15 +332,15 @@ FocusScope {
 
                 NIcon {
                     icon: "alert-circle"
-                    pointSize: NStyle.fontSizeL
-                    color: NColors.mOnError
+                    pointSize: Style.fontSizeL
+                    color: Color.mOnError
                 }
 
                 NText {
                     text: root.loginErrorMessage || "Authentication failed"
-                    color: NColors.mOnError
-                    pointSize: NStyle.fontSizeL
-                    font.weight: NStyle.fontWeightMedium
+                    color: Color.mOnError
+                    pointSize: Style.fontSizeL
+                    font.weight: Style.fontWeightMedium
                     horizontalAlignment: Text.AlignHCenter
                 }
             }
@@ -371,23 +372,23 @@ FocusScope {
             // Anchored to sit exactly on top of the bottomContainer
             anchors.horizontalCenter: bottomContainer.horizontalCenter
             anchors.bottom: bottomContainer.top
-            anchors.bottomMargin: -NStyle.radiusL // Overlap slightly to look connected
+            anchors.bottomMargin: -Style.radiusL // Overlap slightly to look connected
             z: -1 // Send behind bottomContainer so the rounded corners look like a tab
 
             // --- SIZE ---
-            height: 40 + NStyle.radiusL // Add radius to height for the overlap
+            height: 40 + Style.radiusL // Add radius to height for the overlap
             width: {
                 if (battery.isReady && hasKeyboard)
-                    return 200 * NStyle.uiScaleRatio;
+                    return 200 * Style.uiScaleRatio;
                 if (battery.isReady || hasKeyboard)
-                    return 120 * NStyle.uiScaleRatio;
+                    return 120 * Style.uiScaleRatio;
                 return 0;
             }
 
             // --- STYLING ---
             // Only round top corners
-            radius: NStyle.radiusL
-            color: NColors.mSurface
+            radius: Style.radiusL
+            color: Color.mSurface
 
             // Since we are simulating top-only radius with z-index overlap,
             // we don't need complex canvas drawing here.
@@ -416,15 +417,15 @@ FocusScope {
                                 return "battery-2";
                             return "battery-1"; // or "battery-off" for low
                         }
-                        pointSize: NStyle.fontSizeM
-                        color: (battery.charging || battery.percent < 20) ? NColors.mPrimary : NColors.mOnSurfaceVariant
+                        pointSize: Style.fontSizeM
+                        color: (battery.charging || battery.percent < 20) ? Color.mPrimary : Color.mOnSurfaceVariant
                     }
 
                     NText {
                         text: battery.percent + "%"
-                        color: NColors.mOnSurfaceVariant
-                        pointSize: NStyle.fontSizeM
-                        font.weight: NStyle.fontWeightMedium
+                        color: Color.mOnSurfaceVariant
+                        pointSize: Style.fontSizeM
+                        font.weight: Style.fontWeightMedium
                     }
                 }
                 // Keyboard Layout Indicator
@@ -441,16 +442,16 @@ FocusScope {
 
                         NIcon {
                             icon: "keyboard"
-                            pointSize: NStyle.fontSizeM
-                            color: NColors.mOnSurfaceVariant
+                            pointSize: Style.fontSizeM
+                            color: Color.mOnSurfaceVariant
                         }
 
                         NText {
                             // Uses SDDM standard property
                             text: keyboard.currentLayout || "en"
-                            color: NColors.mOnSurfaceVariant
-                            pointSize: NStyle.fontSizeM
-                            font.weight: NStyle.fontWeightMedium
+                            color: Color.mOnSurfaceVariant
+                            pointSize: Style.fontSizeM
+                            font.weight: Style.fontWeightMedium
                             elide: Text.ElideRight
                         }
 
@@ -476,8 +477,8 @@ FocusScope {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 100
-            radius: NStyle.radiusL
-            color: NColors.mSurface
+            radius: Style.radiusL
+            color: Color.mSurface
 
             Component.onCompleted: passwordComponent.forceFocus()
 
@@ -485,8 +486,8 @@ FocusScope {
             Item {
                 id: buttonRowTextMeasurer
                 visible: false
-                property real iconSize: NStyle.fontSizeM
-                property real fontSize: NStyle.fontSizeS
+                property real iconSize: Style.fontSizeM
+                property real fontSize: Style.fontSizeS
                 property real spacing: 6
                 property real padding: 18
 
@@ -521,7 +522,7 @@ FocusScope {
 
             property int buttonCount: 4
             property int spacingCount: buttonCount - 1
-            property real minButtonRowWidth: buttonRowTextMeasurer.minButtonWidth > 0 ? (buttonCount * buttonRowTextMeasurer.minButtonWidth) + (spacingCount * 10) + 40 + (2 * NStyle.marginM) + 28 + (2 * NStyle.marginM) : 750
+            property real minButtonRowWidth: buttonRowTextMeasurer.minButtonWidth > 0 ? (buttonCount * buttonRowTextMeasurer.minButtonWidth) + (spacingCount * 10) + 40 + (2 * Style.marginM) + 28 + (2 * Style.marginM) : 750
             width: Math.max(750, minButtonRowWidth)
 
             ColumnLayout {
@@ -539,17 +540,17 @@ FocusScope {
                     spacing: 0
 
                     Item {
-                        Layout.preferredWidth: NStyle.marginM
+                        Layout.preferredWidth: Style.marginM
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 48
                         radius: height / 2
-                        color: NColors.mSurface
+                        color: Color.mSurface
 
                         // Highlight border when focused
-                        border.color: userInput.activeFocus ? NColors.mPrimary : Qt.alpha(NColors.mOutline, 0.3)
+                        border.color: userInput.activeFocus ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.3)
                         border.width: userInput.activeFocus ? 2 : 1
 
                         // MouseArea to ensure clicking anywhere focuses the input
@@ -567,8 +568,8 @@ FocusScope {
                             anchors.rightMargin: 18
 
                             text: root.currentUserName
-                            font.pointSize: NStyle.fontSizeM
-                            color: NColors.mOnSurface
+                            font.pointSize: Style.fontSizeM
+                            color: Color.mOnSurface
                             verticalAlignment: TextInput.AlignVCenter
                             clip: true
 
@@ -582,8 +583,8 @@ FocusScope {
                         // The User Icon
                         NIcon {
                             icon: "user"
-                            pointSize: NStyle.fontSizeL
-                            color: userInput.activeFocus ? NColors.mPrimary : NColors.mOnSurfaceVariant
+                            pointSize: Style.fontSizeL
+                            color: userInput.activeFocus ? Color.mPrimary : Color.mOnSurfaceVariant
                             anchors.left: parent.left
                             anchors.leftMargin: 18
                             anchors.verticalCenter: parent.verticalCenter
@@ -598,7 +599,7 @@ FocusScope {
                     }
 
                     Item {
-                        Layout.preferredWidth: NStyle.marginM
+                        Layout.preferredWidth: Style.marginM
                     }
                 }
 
@@ -618,7 +619,7 @@ FocusScope {
                     }
 
                     Item {
-                        Layout.preferredWidth: NStyle.marginM
+                        Layout.preferredWidth: Style.marginM
                     }
 
                     Rectangle {
@@ -626,8 +627,8 @@ FocusScope {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 48
                         radius: height / 2
-                        color: NColors.mSurface
-                        border.color: passwordInput.activeFocus ? NColors.mPrimary : Qt.alpha(NColors.mOutline, 0.3)
+                        color: Color.mSurface
+                        border.color: passwordInput.activeFocus ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.3)
                         border.width: passwordInput.activeFocus ? 2 : 1
 
                         property bool passwordVisible: false
@@ -647,8 +648,8 @@ FocusScope {
 
                             NIcon {
                                 icon: "lock"
-                                pointSize: NStyle.fontSizeL
-                                color: passwordInput.activeFocus ? NColors.mPrimary : NColors.mOnSurfaceVariant
+                                pointSize: Style.fontSizeL
+                                color: passwordInput.activeFocus ? Color.mPrimary : Color.mOnSurfaceVariant
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
@@ -659,7 +660,7 @@ FocusScope {
                                 height: 0
                                 visible: true
                                 enabled: root.uiEnabled
-                                font.pointSize: NStyle.fontSizeM
+                                font.pointSize: Style.fontSizeM
                                 color: "transparent"
                                 cursorDelegate: Item {}
                                 echoMode: inputBackground.passwordVisible ? TextInput.Normal : TextInput.Password
@@ -683,7 +684,7 @@ FocusScope {
                                     id: cursorStart
                                     width: 2
                                     height: 20
-                                    color: NColors.mPrimary
+                                    color: Color.mPrimary
                                     visible: passwordInput.activeFocus && passwordInput.text.length === 0
                                     anchors.verticalCenter: parent.verticalCenter
                                     SequentialAnimation on opacity {
@@ -715,8 +716,8 @@ FocusScope {
                                             model: passwordInput.text.length
                                             NIcon {
                                                 icon: "circle-filled"
-                                                pointSize: NStyle.fontSizeS
-                                                color: NColors.mPrimary
+                                                pointSize: Style.fontSizeS
+                                                color: Color.mPrimary
                                                 opacity: 1.0
                                             }
                                         }
@@ -726,8 +727,8 @@ FocusScope {
                                 // Actual Text
                                 NText {
                                     text: passwordInput.text
-                                    color: NColors.mPrimary
-                                    pointSize: NStyle.fontSizeM
+                                    color: Color.mPrimary
+                                    pointSize: Style.fontSizeM
                                     font.weight: Font.Medium
                                     visible: passwordInput.text.length > 0 && inputBackground.passwordVisible
                                     anchors.verticalCenter: parent.verticalCenter
@@ -740,7 +741,7 @@ FocusScope {
                                     id: cursorEnd
                                     width: 2
                                     height: 20
-                                    color: NColors.mPrimary
+                                    color: Color.mPrimary
                                     visible: passwordInput.activeFocus && passwordInput.text.length > 0
                                     anchors.verticalCenter: parent.verticalCenter
                                     SequentialAnimation on opacity {
@@ -767,15 +768,15 @@ FocusScope {
                             width: 36
                             height: 36
                             radius: height / 2
-                            color: eyeButtonArea.containsMouse ? NColors.mPrimary : NColors.transparent
+                            color: eyeButtonArea.containsMouse ? Color.mPrimary : Color.transparent
                             visible: passwordInput.text.length > 0
                             enabled: root.uiEnabled
 
                             NIcon {
                                 anchors.centerIn: parent
                                 icon: inputBackground.passwordVisible ? "eye-off" : "eye"
-                                pointSize: NStyle.fontSizeM
-                                color: eyeButtonArea.containsMouse ? NColors.mOnPrimary : NColors.mOnSurfaceVariant
+                                pointSize: Style.fontSizeM
+                                color: eyeButtonArea.containsMouse ? Color.mOnPrimary : Color.mOnSurfaceVariant
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: 200
@@ -806,16 +807,16 @@ FocusScope {
                             width: 36
                             height: 36
                             radius: height / 2
-                            color: submitButtonArea.containsMouse ? NColors.mPrimary : NColors.transparent
-                            border.color: NColors.mPrimary
-                            border.width: NStyle.borderS
+                            color: submitButtonArea.containsMouse ? Color.mPrimary : Color.transparent
+                            border.color: Color.mPrimary
+                            border.width: Style.borderS
                             enabled: root.uiEnabled
 
                             NIcon {
                                 anchors.centerIn: parent
                                 icon: "arrow-forward"
-                                pointSize: NStyle.fontSizeM
-                                color: submitButtonArea.containsMouse ? NColors.mOnPrimary : NColors.mPrimary
+                                pointSize: Style.fontSizeM
+                                color: submitButtonArea.containsMouse ? Color.mOnPrimary : Color.mPrimary
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: 200
@@ -846,7 +847,7 @@ FocusScope {
                     }
 
                     Item {
-                        Layout.preferredWidth: NStyle.marginM
+                        Layout.preferredWidth: Style.marginM
                     }
                 }
 
@@ -859,7 +860,7 @@ FocusScope {
                     spacing: 0
 
                     Item {
-                        Layout.preferredWidth: NStyle.marginM
+                        Layout.preferredWidth: Style.marginM
                     }
 
                     NComboBox {
@@ -884,14 +885,14 @@ FocusScope {
                         icon: "suspend"
                         text: "Suspend"
                         outlined: true
-                        backgroundColor: NColors.mOnSurfaceVariant
-                        textColor: NColors.mOnPrimary
-                        hoverColor: NColors.mPrimary
-                        fontSize: (config.compact == "true") ? NStyle.fontSizeS : NStyle.fontSizeM
-                        iconSize: (config.compact == "true") ? NStyle.fontSizeM : NStyle.fontSizeL
-                        fontWeight: NStyle.fontWeightMedium
+                        backgroundColor: Color.mOnSurfaceVariant
+                        textColor: Color.mOnPrimary
+                        hoverColor: Color.mPrimary
+                        fontSize: (config.compact == "true") ? Style.fontSizeS : Style.fontSizeM
+                        iconSize: (config.compact == "true") ? Style.fontSizeM : Style.fontSizeL
+                        fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
-                        buttonRadius: NStyle.radiusL
+                        buttonRadius: Style.radiusL
                         onClicked: sddm.suspend()
                     }
 
@@ -905,14 +906,14 @@ FocusScope {
                         icon: "reboot"
                         text: "Reboot"
                         outlined: true
-                        backgroundColor: NColors.mOnSurfaceVariant
-                        textColor: NColors.mOnPrimary
-                        hoverColor: NColors.mPrimary
-                        fontSize: (config.compact == "true") ? NStyle.fontSizeS : NStyle.fontSizeM
-                        iconSize: (config.compact == "true") ? NStyle.fontSizeM : NStyle.fontSizeL
-                        fontWeight: NStyle.fontWeightMedium
+                        backgroundColor: Color.mOnSurfaceVariant
+                        textColor: Color.mOnPrimary
+                        hoverColor: Color.mPrimary
+                        fontSize: (config.compact == "true") ? Style.fontSizeS : Style.fontSizeM
+                        iconSize: (config.compact == "true") ? Style.fontSizeM : Style.fontSizeL
+                        fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
-                        buttonRadius: NStyle.radiusL
+                        buttonRadius: Style.radiusL
                         onClicked: sddm.reboot()
                     }
 
@@ -926,19 +927,19 @@ FocusScope {
                         icon: "shutdown"
                         text: "Shutdown"
                         outlined: true
-                        backgroundColor: NColors.mError
-                        textColor: NColors.mOnError
-                        hoverColor: NColors.mError
-                        fontSize: (config.compact == "true") ? NStyle.fontSizeS : NStyle.fontSizeM
-                        iconSize: (config.compact == "true") ? NStyle.fontSizeM : NStyle.fontSizeL
-                        fontWeight: NStyle.fontWeightMedium
+                        backgroundColor: Color.mError
+                        textColor: Color.mOnError
+                        hoverColor: Color.mError
+                        fontSize: (config.compact == "true") ? Style.fontSizeS : Style.fontSizeM
+                        iconSize: (config.compact == "true") ? Style.fontSizeM : Style.fontSizeL
+                        fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
-                        buttonRadius: NStyle.radiusL
+                        buttonRadius: Style.radiusL
                         onClicked: sddm.powerOff()
                     }
 
                     Item {
-                        Layout.preferredWidth: NStyle.marginM
+                        Layout.preferredWidth: Style.marginM
                     }
                 }
             }
@@ -951,7 +952,7 @@ FocusScope {
     Connections {
         target: sddm
         function onLoginSucceeded() {
-            consol.log("Login Successful.")
+            consol.log("Login Successful.");
         }
         function onLoginFailed() {
             root.loggingIn = false;

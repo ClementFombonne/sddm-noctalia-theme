@@ -1,2 +1,2 @@
-singleton NColors 1.0 NColors.qml
-singleton NStyle 1.0 NStyle.qml
+singleton Color 1.0 Color.qml
+singleton Style 1.0 Style.qml
