@@ -1,0 +1,14 @@
+[SddmGreeterTheme]
+Name=NoctaliaShell
+Description=SDDM theme inspired by noctaliashell lockscreen
+Author=Clement
+Copyright=(c) 2025 Clement
+License=GPLv3
+Type=sddm-theme
+version=0.1
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationDirectory=translations
+QtVersion=6
+Theme-Id=noctalia-sddm
+Theme-API=2.0

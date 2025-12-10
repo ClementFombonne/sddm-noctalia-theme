@@ -1,0 +1,240 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+
+import "./"
+
+RowLayout {
+    id: root
+
+    property real minimumWidth: 200 * NStyle.uiScaleRatio
+    property real popupHeight: 180 * NStyle.uiScaleRatio
+
+    property string textRole: "name"
+    property var model
+    property string currentKey: ""
+    property string placeholder: ""
+
+    property alias currentIndex: combo.currentIndex
+    signal activated(int index)
+    signal selected(string key)
+    signal popupClosed
+
+    readonly property real preferredHeight: NStyle.baseWidgetSize * 1.1 * NStyle.uiScaleRatio
+
+    spacing: NStyle.marginL
+    Layout.fillWidth: true
+
+    function itemCount() {
+        if (!root.model)
+            return 0;
+        if (typeof root.model.count === 'number')
+            return root.model.count;
+        if (Array.isArray(root.model))
+            return root.model.length;
+        return 0;
+    }
+
+    function getItem(index) {
+        if (!root.model)
+            return null;
+        if (typeof root.model.get === 'function')
+            return root.model.get(index);
+        if (Array.isArray(root.model))
+            return root.model[index];
+        return null;
+    }
+
+    function findIndexByKey(key) {
+        for (var i = 0; i < itemCount(); i++) {
+            var item = getItem(i);
+            if (item && item.key === key)
+                return i;
+        }
+        return -1;
+    }
+
+    ComboBox {
+        id: combo
+
+        Layout.minimumWidth: root.minimumWidth
+        Layout.preferredHeight: root.preferredHeight
+        model: root.model
+        textRole: root.textRole
+
+        currentIndex: findIndexByKey(currentKey)
+        onActivated: {
+            root.activated(combo.currentIndex);
+
+            var item = getItem(combo.currentIndex);
+            if (item && item.key !== undefined)
+                root.selected(item.key);
+        }
+
+        background: Rectangle {
+            implicitWidth: NStyle.baseWidgetSize * 3.75
+            implicitHeight: preferredHeight
+            color: NColors.mSurface
+            border.color: combo.activeFocus ? NColors.mSecondary : NColors.mOutline
+            border.width: NStyle.borderS
+            radius: NStyle.iRadiusM
+
+            Behavior on border.color {
+                ColorAnimation {
+                    duration: NStyle.animationFast
+                }
+            }
+        }
+
+        contentItem: NText {
+            leftPadding: NStyle.marginL
+            rightPadding: combo.indicator.width + NStyle.marginL
+            pointSize: NStyle.fontSizeM
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            color: (combo.currentIndex >= 0) ? NColors.mOnSurface : NColors.mOnSurfaceVariant
+            text: (combo.currentIndex >= 0) ? combo.displayText : root.placeholder
+        }
+
+        indicator: NIcon {
+            x: combo.width - width - NStyle.marginM
+            y: combo.topPadding + (combo.availableHeight - height) / 2
+            icon: "caret-down"
+            pointSize: NStyle.fontSizeL
+        }
+
+        popup: Popup {
+            y: combo.height
+            implicitWidth: combo.width - NStyle.marginM
+            implicitHeight: Math.min(root.popupHeight, contentItem.implicitHeight + NStyle.marginM * 2)
+            padding: NStyle.marginM
+
+            onClosed: root.popupClosed()
+
+            contentItem: NListView {
+                model: combo.popup.visible ? root.model : null
+                implicitHeight: contentHeight
+                horizontalPolicy: ScrollBar.AlwaysOff
+                verticalPolicy: ScrollBar.AsNeeded
+
+                delegate: ItemDelegate {
+                    property var parentComboBox: combo
+                    property int itemIndex: index
+                    width: ListView.view ? ListView.view.width : (parentComboBox ? parentComboBox.width - NStyle.marginM * 3 : 0)
+                    hoverEnabled: true
+                    highlighted: ListView.view.currentIndex === itemIndex
+
+                    property bool pendingClick: false
+
+                    function handleSelection() {
+                        if (!parentComboBox)
+                            return;
+
+                        var rootItem = parentComboBox.parent;
+
+                        // A. ALWAYS Update UI first (Change index and close)
+                        parentComboBox.currentIndex = itemIndex;
+                        parentComboBox.popup.close();
+
+                        // B. Handle Data Extraction
+                        var keyToEmit = "";
+
+                        // Case 1: C++ Model / ListModel (Direct access to role)
+                        // The variable 'key' is injected directly into the scope
+                        if (typeof key !== "undefined") {
+                            keyToEmit = key;
+                        } else
+                        // Case 2: Javascript Array of Objects (standard Qt way)
+                        // Arrays expose data via 'modelData'
+                        if (typeof modelData !== "undefined" && modelData.key) {
+                            keyToEmit = modelData.key;
+                        } else
+                        // Case 3: Fallback to manual lookup
+                        {
+                            if (rootItem && typeof rootItem.getItem == 'function') {
+                                var item = rootItem.getItem(itemIndex);
+                                if (item && item.key != undefined) {
+                                    keyToEmit = item.key;
+                                }
+                            }
+                        }
+
+                        if (keyToEmit !== "") {
+                            if (rootItem && typeof rootItem.getItem == 'function') {
+                                rootItem.selected(keyToEmit);
+                            }
+                        }
+                    }
+
+                    Timer {
+                        id: clickRetryTimer
+                        interval: 50
+                        repeat: false
+                        onTriggered: {
+                            if (parent.pendingClick && parent.ListView.view && !parent.ListView.view.flicking && !parent.ListView.view.moving) {
+                                parent.pendingClick = false;
+                                parent.handleSelection(); // Call helper
+                            } else if (parent.pendingClick) {
+                                restart();
+                            }
+                        }
+                    }
+
+                    onHoveredChanged: {
+                        if (hovered) {
+                            ListView.view.currentIndex = itemIndex;
+                        }
+                    }
+
+                    onClicked: {
+                        if (ListView.view && (ListView.view.flicking || ListView.view.moving)) {
+                            ListView.view.cancelFlick();
+                            pendingClick = true;
+                            clickRetryTimer.start();
+                        } else {
+                            handleSelection();
+                        }
+                    }
+
+                    background: Rectangle {
+                        anchors.fill: parent
+                        color: highlighted ? NColors.mHover : NColors.transparent
+                        radius: NStyle.iRadiusS
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: NStyle.animationFast
+                            }
+                        }
+                    }
+
+                    contentItem: NText {
+                        text: (typeof name !== "undefined" ? name : (root.getItem(index) ? root.getItem(index).name : ""))
+                        pointSize: NStyle.fontSizeM
+                        color: highlighted ? NColors.mOnHover : NColors.mOnSurface
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: NStyle.animationFast
+                            }
+                        }
+                    }
+                }
+            }
+
+            background: Rectangle {
+                color: NColors.mSurfaceVariant
+                border.color: NColors.mOutline
+                border.width: NStyle.borderS
+                radius: NStyle.iRadiusM
+            }
+        }
+
+        Connections {
+            target: root
+            function onCurrentKeyChanged() {
+                combo.currentIndex = root.findIndexByKey(currentKey);
+            }
+        }
+    }
+}
