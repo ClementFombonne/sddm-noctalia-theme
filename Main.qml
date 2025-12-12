@@ -356,20 +356,16 @@ FocusScope {
             }
         }
         // ---------------------------------------------------------
-        // 2.5 STATUS BAR (Keyboard & Battery)
+        // 2.5 STATUS BAR (Keyboard)
         // ---------------------------------------------------------
         Rectangle {
             id: statusBar
 
-            NBattery {
-                id: battery
-            }
-
             // --- LOGIC ---
             // property bool hasKeyboard: true
-            property bool hasKeyboard: keyboard.layouts.length > 1
+            property bool hasKeyboard: true //keyboard.layouts.length > 1
             // Show if at least one status is available (Compact mode check removed as requested)
-            visible: battery.isReady || hasKeyboard
+            visible: hasKeyboard
 
             // --- POSITIONING ---
             // Anchored to sit exactly on top of the bottomContainer
@@ -379,14 +375,8 @@ FocusScope {
             z: -1 // Send behind bottomContainer so the rounded corners look like a tab
 
             // --- SIZE ---
-            height: 40 + Style.radiusL // Add radius to height for the overlap
-            width: {
-                if (battery.isReady && hasKeyboard)
-                    return 200 * Style.uiScaleRatio;
-                if (battery.isReady || hasKeyboard)
-                    return 120 * Style.uiScaleRatio;
-                return 0;
-            }
+            height: 30 + Style.radiusL // Add radius to height for the overlap
+            width: (hasKeyboard) ? 120 * Style.uiScaleRatio : 0
 
             // --- STYLING ---
             // Only round top corners
@@ -402,35 +392,6 @@ FocusScope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 16
 
-                // Battery Indicator (Hidden by default in standard SDDM)
-                RowLayout {
-                    spacing: 6
-                    visible: battery.isReady
-
-                    NIcon {
-                        // Logic to choose icon based on state
-                        icon: {
-                            if (battery.charging)
-                                return "battery-charging";
-                            if (battery.percent > 90)
-                                return "battery-4"; // or "battery-full"
-                            if (battery.percent > 60)
-                                return "battery-3";
-                            if (battery.percent > 30)
-                                return "battery-2";
-                            return "battery-1"; // or "battery-off" for low
-                        }
-                        pointSize: Style.fontSizeM
-                        color: (battery.charging || battery.percent < 20) ? Color.mPrimary : Color.mOnSurfaceVariant
-                    }
-
-                    NText {
-                        text: battery.percent + "%"
-                        color: Color.mOnSurfaceVariant
-                        pointSize: Style.fontSizeM
-                        font.weight: Style.fontWeightMedium
-                    }
-                }
                 // Keyboard Layout Indicator
                 Item {
                     visible: statusBar.hasKeyboard
@@ -451,7 +412,8 @@ FocusScope {
 
                         NText {
                             // Uses SDDM standard property
-                            text: keyboard.currentLayout || "en"
+                            text: keyboard.layouts[keyboard.currentLayout] || "en"
+
                             color: Color.mOnSurfaceVariant
                             pointSize: Style.fontSizeM
                             font.weight: Style.fontWeightMedium
@@ -462,7 +424,14 @@ FocusScope {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: keyboard.nextLayout()
+                            onClicked: {
+                                var nextIndex = keyboard.currentLayout + 1;
+                                if (nextIndex >= keyboard.layouts.length) {
+                                    nextIndex = 0;
+                                }
+                                console.log("currentLayout kb:", nextIndex);
+                                keyboard.currentLayout = nextIndex;
+                            }
                         }
                     }
                 }
