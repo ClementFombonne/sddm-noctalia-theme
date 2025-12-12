@@ -62,7 +62,6 @@ All theme settings can be adjusted in the `Commons/Settings.conf` file located i
 | `colorScheme` | The color scheme to apply. See list below.      | `Catppuccin`    | `Dracula`, `Nord`, `Gruvbox`   |
 | `darkMode`    | Use the dark or light variant of the scheme.    | `true`          | `true`, `false`              |
 | `clockStyle`  | Style of the clock widget.                      | `"digital"`     | `"analog"`, `"digital"`      |
-| `compact`     | Use a more compact layout for the login box.    | `true`          | `true`, `false`              |
 
 ### Scaling & Appearance
 
@@ -71,10 +70,10 @@ These options allow you to fine-tune the UI scaling and element shapes. Values a
 | Option              | Description                                       | Default Value |
 |---------------------|---------------------------------------------------|---------------|
 | `fontScale`         | Global scaling factor for all font sizes.         | `1.0`         |
-| `radiusRatio`       | Adjusts the roundness of major containers.        | `0.9`         |
-| `iRadiusRatio`      | Adjusts the roundness of input fields and buttons.| `0.9`         |
-| `screenRadiusRatio` | Adjusts the roundness of the screen corners effect.| `0.9`         |
-| `scaleRatio`        | A master scaling factor for most UI elements.     | `0.9`         |
+| `radiusRatio`       | Adjusts the roundness of major containers.        | `1.0`         |
+| `iRadiusRatio`      | Adjusts the roundness of input fields and buttons.| `1.0`         |
+| `screenRadiusRatio` | Adjusts the roundness of the screen corners effect.| `1.0`         |
+| `scaleRatio`        | A master scaling factor for most UI elements.     | `1.0`         |
 | `animationSpeed`    | Adjusts the speed of UI animations (`>1` is faster). | `1.0`         |
 
 ### Available Color Schemes
@@ -91,6 +90,11 @@ Set the `colorScheme` option in `Settings.conf` to one of the following values:
 - `Nord`
 - `Rosepine`
 - `Tokyo-Night`
+
+### NixOS
+
+Managing SDDM configuration can sometimes be tricky for nixos user.
+If you want a nixos module example you can go check my [nixos config](https://github.com/ClementFombonne/nix-config/blob/main/modules/gui/noctalia-sddm/default.nix)
 
 ## Dependencies
 
