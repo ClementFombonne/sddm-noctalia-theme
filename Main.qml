@@ -322,7 +322,7 @@ FocusScope {
             height: 50
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: (config.compact == "true" ? 280 : 360) * Style.uiScaleRatio
+            anchors.bottomMargin: 280 * Style.uiScaleRatio
             radius: Style.radiusL
             color: Color.mError
             border.color: Color.mError
@@ -475,7 +475,7 @@ FocusScope {
         Rectangle {
             id: bottomContainer
             // Adjust height to fit the extra field
-            height: (config.compact == "true") ? 180 : 280
+            height: 180
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
@@ -859,7 +859,7 @@ FocusScope {
                 // -------------------------------------------------
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: (config.compact == "true") ? 36 : 48
+                    Layout.preferredHeight: 36
                     spacing: 0
 
                     Item {
@@ -891,8 +891,8 @@ FocusScope {
                         backgroundColor: Color.mOnSurfaceVariant
                         textColor: Color.mOnPrimary
                         hoverColor: Color.mPrimary
-                        fontSize: (config.compact == "true") ? Style.fontSizeS : Style.fontSizeM
-                        iconSize: (config.compact == "true") ? Style.fontSizeM : Style.fontSizeL
+                        fontSize: Style.fontSizeS
+                        iconSize: Style.fontSizeM
                         fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
                         buttonRadius: Style.radiusL
@@ -912,8 +912,8 @@ FocusScope {
                         backgroundColor: Color.mOnSurfaceVariant
                         textColor: Color.mOnPrimary
                         hoverColor: Color.mPrimary
-                        fontSize: (config.compact == "true") ? Style.fontSizeS : Style.fontSizeM
-                        iconSize: (config.compact == "true") ? Style.fontSizeM : Style.fontSizeL
+                        fontSize: Style.fontSizeS
+                        iconSize: Style.fontSizeM
                         fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
                         buttonRadius: Style.radiusL
@@ -933,8 +933,8 @@ FocusScope {
                         backgroundColor: Color.mError
                         textColor: Color.mOnError
                         hoverColor: Color.mError
-                        fontSize: (config.compact == "true") ? Style.fontSizeS : Style.fontSizeM
-                        iconSize: (config.compact == "true") ? Style.fontSizeM : Style.fontSizeL
+                        fontSize: Style.fontSizeS
+                        iconSize: Style.fontSizeM
                         fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
                         buttonRadius: Style.radiusL
