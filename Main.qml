@@ -519,7 +519,7 @@ FocusScope {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 48
-                        radius: height / 2
+                        radius: Style.iRadiusL
                         color: Color.mSurface
 
                         // Highlight border when focused
@@ -599,7 +599,7 @@ FocusScope {
                         id: inputBackground
                         Layout.fillWidth: true
                         Layout.preferredHeight: 48
-                        radius: height / 2
+                        radius: Style.iRadiusL
                         color: Color.mSurface
                         border.color: passwordInput.activeFocus ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.3)
                         border.width: passwordInput.activeFocus ? 2 : 1
@@ -740,7 +740,7 @@ FocusScope {
                             anchors.verticalCenter: parent.verticalCenter
                             width: 36
                             height: 36
-                            radius: height / 2
+                            radius: Style.iRadiusL
                             color: eyeButtonArea.containsMouse ? Color.mPrimary : Color.transparent
                             visible: passwordInput.text.length > 0
                             enabled: root.uiEnabled
@@ -779,7 +779,7 @@ FocusScope {
                             anchors.verticalCenter: parent.verticalCenter
                             width: 36
                             height: 36
-                            radius: height / 2
+                            radius: Style.iRadiusL
                             color: submitButtonArea.containsMouse ? Color.mPrimary : Color.transparent
                             border.color: Color.mPrimary
                             border.width: Style.borderS
@@ -865,7 +865,7 @@ FocusScope {
                         iconSize: Style.fontSizeM
                         fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
-                        buttonRadius: Style.radiusL
+                        buttonRadius: Style.iRadiusL
                         onClicked: sddm.suspend()
                     }
 
@@ -886,7 +886,7 @@ FocusScope {
                         iconSize: Style.fontSizeM
                         fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
-                        buttonRadius: Style.radiusL
+                        buttonRadius: Style.iRadiusL
                         onClicked: sddm.reboot()
                     }
 
@@ -907,7 +907,7 @@ FocusScope {
                         iconSize: Style.fontSizeM
                         fontWeight: Style.fontWeightMedium
                         horizontalAlignment: Qt.AlignHCenter
-                        buttonRadius: Style.radiusL
+                        buttonRadius: Style.iRadiusL
                         onClicked: sddm.powerOff()
                     }
 
