@@ -48,19 +48,15 @@ QtObject {
     Component.onCompleted: loadColorScheme()
 
     function loadColorScheme() {
-        // Build the path to the .qml file (NOT .json)
-        // Ensure your file is named exactly like this: Assets/ColorScheme/<name>/<name>.qml
         var path = "../Assets/ColorScheme/" + themeName + "/" + themeName + ".qml";
 
         console.log("Loading Color Scheme QML from:", path);
 
-        // createComponent is the JS equivalent of Loader
         var component = Qt.createComponent(path);
 
         if (component.status === Component.Ready) {
             finishLoading(component);
         } else {
-            // Wait for it to load asynchronously
             component.statusChanged.connect(function () {
                 if (component.status === Component.Ready) {
                     finishLoading(component);
@@ -88,7 +84,6 @@ QtObject {
 
         var source = null;
 
-        // Check if the theme has "dark" and "light" sub-objects
         if (_loadedTheme.dark && _loadedTheme.light) {
             source = root.isDarkMode ? _loadedTheme.dark : _loadedTheme.light;
             console.log("Applying " + (root.isDarkMode ? "Dark" : "Light") + " mode.");
