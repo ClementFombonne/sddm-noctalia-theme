@@ -323,7 +323,7 @@ FocusScope {
             height: 50
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 280 * Style.uiScaleRatio
+            anchors.bottomMargin: 320 * Style.uiScaleRatio
             radius: Style.radiusL
             color: Color.mError
             border.color: Color.mError
