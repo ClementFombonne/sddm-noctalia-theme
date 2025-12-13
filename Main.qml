@@ -86,6 +86,7 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
+        visible: config.hideShadow !== "true"
         gradient: Gradient {
             GradientStop {
                 position: 0.0
