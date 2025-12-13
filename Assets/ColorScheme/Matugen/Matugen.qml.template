@@ -1,0 +1,20 @@
+import QtQuick
+
+QtObject {
+    readonly property color mPrimary: "{{colors.primary.default.hex}}"
+    readonly property color mOnPrimary: "{{colors.on_primary.default.hex}}"
+    readonly property color mSecondary: "{{colors.secondary.default.hex}}"
+    readonly property color mOnSecondary: "{{colors.on_secondary.default.hex}}"
+    readonly property color mTertiary: "{{colors.tertiary.default.hex}}"
+    readonly property color mOnTertiary: "{{colors.on_tertiary.default.hex}}"
+    readonly property color mError: "{{colors.error.default.hex}}"
+    readonly property color mOnError: "{{colors.on_error.default.hex}}"
+    readonly property color mSurface: "{{colors.surface.default.hex}}"
+    readonly property color mOnSurface: "{{colors.on_surface.default.hex}}"
+    readonly property color mSurfaceVariant: "{{colors.surface_container.default.hex}}"
+    readonly property color mOnSurfaceVariant: "{{colors.on_surface_variant.default.hex}}"
+    readonly property color mOutline: "{{colors.outline_variant.default.hex}}"
+    readonly property color mShadow: "{{colors.shadow.default.hex}}"
+    readonly property color mHover: "{{colors.tertiary.default.hex}}"
+    readonly property color mOnHover: "{{colors.on_tertiary.default.hex}}"
+}
