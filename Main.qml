@@ -24,6 +24,7 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
+    property var activeUser: null
     property var userMap: ({})
     function getUser(username) {
         if (root.userMap && root.userMap[username]) {
@@ -35,31 +36,36 @@ FocusScope {
         model: userModel
         delegate: Item {
             Component.onCompleted: {
-                root.userMap[name] = {
+                var userData = {
                     "name": name,
                     "realName": realName,
                     "icon": icon
                 };
+                root.userMap[name] = userData;
+
+                if (name === root.currentUserName) {
+                    root.activeUser = userData;
+                }
+
                 if (index === 0 && root.currentUserName === "") {
                     console.log("lastUser was empty. Auto-selecting first user:", name);
                     root.currentUserName = name;
+                    root.activeUser = userData; // Update object too
                 }
             }
         }
     }
 
+    onCurrentUserNameChanged: {
+        root.activeUser = root.getUser(root.currentUserName);
+    }
     function startLogin(password) {
         if (password == "") {
             console.log("Error: Password is empty");
             return;
         }
 
-        console.log("---------------- LOGIN ATTEMPT ----------------");
-        console.log("User:", root.currentUserName);
-        console.log("Pass:", password);
-        console.log("Session Index:", root.currentSessionIndex);
-
-        if (!root.getUser(currentUserName)) {
+        if (!root.activeUser) {
             console.log("ERROR: currentUserName is undefined or empty!");
 
             root.loggingIn = false;
