@@ -24,10 +24,22 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
+    property var userMap: ({})
+    function getUser(username) {
+        if (root.userMap && root.userMap[username]) {
+            return root.userMap[username];
+        }
+        return null;
+    }
     Repeater {
         model: userModel
         delegate: Item {
             Component.onCompleted: {
+                root.userMap[name] = {
+                    "name": name,
+                    "realName": realName,
+                    "icon": icon
+                };
                 if (index === 0 && root.currentUserName === "") {
                     console.log("lastUser was empty. Auto-selecting first user:", name);
                     root.currentUserName = name;
@@ -47,10 +59,15 @@ FocusScope {
         console.log("Pass:", password);
         console.log("Session Index:", root.currentSessionIndex);
 
-        if (!root.currentUserName) {
+        if (!root.getUser(currentUserName)) {
             console.log("ERROR: currentUserName is undefined or empty!");
-            // Temporary fix for testing: hardcode a user
-            // root.currentUserName = "clement"
+
+            root.loggingIn = false;
+            root.loginErrorMessage = "Invalid username";
+            root.uiEnabled = true;
+
+            passwordComponent.clear();
+            passwordComponent.forceFocus();
             return;
         }
 
@@ -272,13 +289,29 @@ FocusScope {
                 spacing: 32
 
                 NAvatar {
-                    currentUserName: root.currentUserName
+                    imageSource: {
+                        var user = root.getUser(root.currentUserName);
+                        var path = (user && user.icon) ? user.icon : (config.DefaultAvatar || "");
+
+                        if (path.length > 0 && path.indexOf("/") === 0) {
+                            return "file://" + path;
+                        }
+                        return path;
+                    }
                 }
 
                 ColumnLayout {
                     // User Name
                     NText {
-                        text: "Welcome"
+                        text: {
+                            var user = root.getUser(root.currentUserName);
+                            var name = "";
+                            if (user && user.name)
+                                name = user.name;
+                            if (user && user.realName)
+                                name = user.realName;
+                            return (name != "") ? "Welcome, " + name : "Invalid user";
+                        }
                         pointSize: Style.fontSizeXXL
                         font.weight: Style.fontWeightMedium
                         color: Color.mOnSurface
@@ -364,7 +397,7 @@ FocusScope {
 
             // --- LOGIC ---
             // property bool hasKeyboard: true
-            property bool hasKeyboard: true //keyboard.layouts.length > 1
+            property bool hasKeyboard: keyboard.layouts.length > 1
             // Show if at least one status is available (Compact mode check removed as requested)
             visible: hasKeyboard
 
@@ -547,7 +580,10 @@ FocusScope {
                             clip: true
 
                             // Update the main property when user types
-                            onTextEdited: root.currentUserName = text
+                            onTextEdited: {
+                                root.currentUserName = text;
+                                root.loginErrorMessage = "";
+                            }
 
                             // On Enter, jump to password field
                             onAccepted: passwordComponent.forceFocus()
@@ -640,12 +676,15 @@ FocusScope {
                                 passwordCharacter: "•"
                                 passwordMaskDelay: 0
 
+                                onTextEdited: {
+                                    root.loginErrorMessage = "";
+                                }
+
                                 Keys.onPressed: function (event) {
                                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                                         root.startLogin(text);
                                     }
                                 }
-                                // Focus handled by User Input or Defaults
                             }
 
                             // Visual representation (Dots/Text/Cursor)
