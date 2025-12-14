@@ -296,8 +296,7 @@ FocusScope {
 
                 NAvatar {
                     imageSource: {
-                        var user = root.getUser(root.currentUserName);
-                        var path = (user && user.icon) ? user.icon : (config.DefaultAvatar || "");
+                        var path = (root.activeUser && root.activeUser.icon) ? root.activeUser.icon : (config.DefaultAvatar || "");
 
                         if (path.length > 0 && path.indexOf("/") === 0) {
                             return "file://" + path;
@@ -310,12 +309,11 @@ FocusScope {
                     // User Name
                     NText {
                         text: {
-                            var user = root.getUser(root.currentUserName);
                             var name = "";
-                            if (user && user.name)
-                                name = user.name;
-                            if (user && user.realName)
-                                name = user.realName;
+                            if (root.activeUser && root.activeUser.name)
+                                name = root.activeUser.name;
+                            if (root.activeUser && root.activeUser.realName)
+                                name = root.activeUser.realName;
                             return (name != "") ? "Welcome, " + name : "Invalid user";
                         }
                         pointSize: Style.fontSizeXXL
