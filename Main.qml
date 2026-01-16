@@ -15,6 +15,18 @@ FocusScope {
     property int currentSessionIndex: 0
     Component.onCompleted: {
         currentSessionIndex = sessionModel.lastIndex;
+        // Ensure activeUser is set initially based on currentUserName after all users are loaded
+        if (root.currentUserName && root.userMap[root.currentUserName]) {
+            root.activeUser = root.userMap[root.currentUserName];
+        } else if (userModel.count > 0) {
+            // If currentUserName is not set or not found, try to auto-select the first user
+            // This case should be handled by the Repeater for `lastUser was empty`, but as a fallback
+            var firstUser = userModel.get(0);
+            if (firstUser && root.userMap[firstUser.name]) {
+                root.currentUserName = firstUser.name;
+                root.activeUser = root.userMap[firstUser.name];
+            }
+        }
     }
     property bool uiEnabled: true
     property string loginErrorMessage: ""
@@ -42,10 +54,6 @@ FocusScope {
                     "icon": icon
                 };
                 root.userMap[name] = userData;
-
-                if (name === root.currentUserName) {
-                    root.activeUser = userData;
-                }
 
                 if (index === 0 && root.currentUserName === "") {
                     console.log("lastUser was empty. Auto-selecting first user:", name);
