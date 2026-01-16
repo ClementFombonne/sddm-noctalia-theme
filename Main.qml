@@ -56,9 +56,7 @@ FocusScope {
         }
     }
 
-    onCurrentUserNameChanged: {
-        root.activeUser = root.getUser(root.currentUserName);
-    }
+    
     function startLogin(password) {
         if (password == "") {
             console.log("Error: Password is empty");
@@ -586,6 +584,7 @@ FocusScope {
                             // Update the main property when user types
                             onTextEdited: {
                                 root.currentUserName = text;
+                                root.activeUser = root.getUser(text);
                                 root.loginErrorMessage = "";
                             }
 
