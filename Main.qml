@@ -57,6 +57,13 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
+    onCurrentUserNameChanged: {
+        // When currentUserName changes (including initial binding to lastUser),
+        // update activeUser if that user is already loaded
+        if (currentUserName && userMap[currentUserName]) {
+            activeUser = userMap[currentUserName];
+        }
+    }
     property var activeUser: null
     property var userMap: ({})
     function getUser(username) {
