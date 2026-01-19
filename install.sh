@@ -90,6 +90,7 @@ install_theme() {
     mkdir -p "$INSTALL_DIR"
     
     # Copy theme files selectively
+    # Note: This list should be updated if new essential files/directories are added to the theme
     for item in Assets Commons Helpers Widgets Main.qml metadata.desktop qmldir; do
         if [[ -e "$SCRIPT_DIR/$item" ]]; then
             cp -r "$SCRIPT_DIR/$item" "$INSTALL_DIR/"
@@ -97,7 +98,7 @@ install_theme() {
     done
     
     # Verify essential files were copied
-    if [[ ! -f "$INSTALL_DIR/Main.qml" ]] || [[ ! -d "$INSTALL_DIR/Commons" ]]; then
+    if [[ ! -f "$INSTALL_DIR/Main.qml" ]] || [[ ! -d "$INSTALL_DIR/Commons" ]] || [[ ! -f "$INSTALL_DIR/metadata.desktop" ]]; then
         print_error "Failed to copy essential theme files"
         rm -rf "$INSTALL_DIR"
         exit 1
@@ -135,7 +136,8 @@ configure_sddm() {
             cp /etc/sddm.conf /etc/sddm.conf.backup-$(date +%Y%m%d-%H%M%S)
             print_success "Created backup of /etc/sddm.conf"
             
-            # Update or add Theme section with safer approach
+            # Update or add Theme section
+            # Note: THEME_NAME is a constant without special regex characters, so no escaping needed
             if grep -q "^\[Theme\]" /etc/sddm.conf; then
                 # Check if Current exists in Theme section
                 if sed -n '/^\[Theme\]/,/^\[/p' /etc/sddm.conf | grep -q "^Current="; then

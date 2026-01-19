@@ -94,6 +94,7 @@ update_sddm_config() {
                 print_success "Created backup of $file"
                 
                 # Comment out the Current line with this theme
+                # Note: THEME_NAME is a constant without special regex characters, so no escaping needed
                 sed -i "s/^Current=${THEME_NAME}/#Current=${THEME_NAME}/" "$file"
                 print_success "Commented out theme reference in $file"
             done
