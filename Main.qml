@@ -37,14 +37,6 @@ FocusScope {
         return null;
     }
 
-    function initializeUsers() {
-        console.log("Initializing users, count:", userModel.count);
-
-    // userMap will be populated by the Repeater
-    // This function just waits for it to complete
-    // We'll use a different approach with Instantiator
-    }
-
     // Use Instantiator to populate userMap synchronously
     Instantiator {
         id: userInstantiator
@@ -65,10 +57,8 @@ FocusScope {
                     "icon": userIcon
                 };
 
-                // Add to map
-                var newMap = root.userMap;
-                newMap[userName] = userData;
-                root.userMap = newMap;
+                // Add to map without reassigning the property
+                root.userMap[userName] = userData;
 
                 // Check if we're done loading all users
                 var loadedCount = Object.keys(root.userMap).length;
@@ -88,7 +78,6 @@ FocusScope {
                         }
                     }
                     root.usersReady = true;
-                    console.log("All users ready, activeUser:", root.activeUser ? root.activeUser.name : "null");
                 }
             }
         }
@@ -101,7 +90,7 @@ FocusScope {
         }
 
         if (!root.activeUser) {
-            console.log("ERROR: currentUserName is undefined or empty!");
+            console.log("ERROR: activeUser is undefined! currentUserName:", root.currentUserName);
 
             root.loggingIn = false;
             root.loginErrorMessage = "Invalid username";
@@ -350,7 +339,7 @@ FocusScope {
                             }
 
                             var name = root.activeUser.realName || root.activeUser.name || "";
-                            return (name != "") ? "Welcome, " + name : "Invalid user";
+                            return (name !== "") ? "Welcome, " + name : "Invalid user";
                         }
                         pointSize: Style.fontSizeXXL
                         font.weight: Style.fontWeightMedium

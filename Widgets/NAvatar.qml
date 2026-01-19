@@ -18,10 +18,6 @@ Item {
     Layout.preferredHeight: baseSize
     Layout.alignment: Qt.AlignVCenter
 
-    onImageSourceChanged: {
-        console.log("source image:", imageSource);
-    }
-
     // ---------------------------------------------------------
     // 1. ANIMATED BORDER RING
     // ---------------------------------------------------------
@@ -73,15 +69,15 @@ Item {
                 maskEnabled: true
                 maskSource: mask
             }
-            Rectangle {
-                id: mask
-                radius: height / 2
-                anchors.fill: avatarImg
-                visible: false
-                layer.enabled: true
-            }
         }
 
+        Rectangle {
+            id: mask
+            radius: height / 2
+            anchors.fill: avatarImg
+            visible: false
+            layer.enabled: true
+        }
         // ---------------------------------------------------------
         // 3. FALLBACK ICON
         // ---------------------------------------------------------
