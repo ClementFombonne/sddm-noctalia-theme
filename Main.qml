@@ -13,9 +13,12 @@ FocusScope {
 
     // --- LOGIC VARIABLES ---
     property int currentSessionIndex: 0
+    property bool usersReady: false
+
     Component.onCompleted: {
         currentSessionIndex = sessionModel.lastIndex;
     }
+
     property bool uiEnabled: true
     property string loginErrorMessage: ""
     property string currentTime: Qt.formatDateTime(new Date(), "hh:mm")
@@ -24,13 +27,57 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
-    Repeater {
+    property var activeUser: null
+    property var userMap: ({})
+
+    function getUser(username) {
+        if (root.userMap && root.userMap[username]) {
+            return root.userMap[username];
+        }
+        return null;
+    }
+
+    // Use Instantiator to populate userMap synchronously
+    Instantiator {
+        id: userInstantiator
         model: userModel
-        delegate: Item {
+
+        delegate: QtObject {
+            readonly property string userName: model.name
+            readonly property string userRealName: model.realName
+            readonly property string userIcon: model.icon
+            readonly property int userIndex: index
+
             Component.onCompleted: {
-                if (index === 0 && root.currentUserName === "") {
-                    console.log("lastUser was empty. Auto-selecting first user:", name);
-                    root.currentUserName = name;
+                console.log("Loading user:", userName, userRealName, userIcon);
+
+                var userData = {
+                    "name": userName,
+                    "realName": userRealName,
+                    "icon": userIcon
+                };
+
+                // Add to map without reassigning the property
+                root.userMap[userName] = userData;
+
+                // Check if we're done loading all users
+                var loadedCount = Object.keys(root.userMap).length;
+                console.log("Loaded", loadedCount, "of", userModel.count);
+
+                if (loadedCount === userModel.count) {
+                    // All users loaded, now set active user
+                    if (root.currentUserName && root.userMap[root.currentUserName]) {
+                        console.log("Setting active user to last user:", root.currentUserName);
+                        root.activeUser = root.userMap[root.currentUserName];
+                    } else {
+                        var firstKey = Object.keys(root.userMap)[0];
+                        if (firstKey) {
+                            console.log("Setting active user to first user:", firstKey);
+                            root.currentUserName = firstKey;
+                            root.activeUser = root.userMap[firstKey];
+                        }
+                    }
+                    root.usersReady = true;
                 }
             }
         }
@@ -42,15 +89,15 @@ FocusScope {
             return;
         }
 
-        console.log("---------------- LOGIN ATTEMPT ----------------");
-        console.log("User:", root.currentUserName);
-        console.log("Pass:", password);
-        console.log("Session Index:", root.currentSessionIndex);
+        if (!root.activeUser) {
+            console.log("ERROR: activeUser is undefined! currentUserName:", root.currentUserName);
 
-        if (!root.currentUserName) {
-            console.log("ERROR: currentUserName is undefined or empty!");
-            // Temporary fix for testing: hardcode a user
-            // root.currentUserName = "clement"
+            root.loggingIn = false;
+            root.loginErrorMessage = "Invalid username";
+            root.uiEnabled = true;
+
+            passwordComponent.clear();
+            passwordComponent.forceFocus();
             return;
         }
 
@@ -67,8 +114,6 @@ FocusScope {
         source: "Assets/Fonts/tabler/tabler-icons.ttf"
     }
     property string iconFont: iconFontLoader.name
-    // --- CLOCK TIMER ---
-    // QML doesn't update time automatically, we need a timer
 
     // ---------------------------------------------------------
     // 1. BACKGROUND
@@ -112,7 +157,7 @@ FocusScope {
         anchors.fill: parent
         visible: true
 
-        property color cornerColor: Color.black // Qt.alpha(Color.mSurface, config.backgroundOpacity)
+        property color cornerColor: Color.black
         property real cornerRadius: Style.screenRadius
         property real cornerSize: Style.screenRadius
 
@@ -272,13 +317,30 @@ FocusScope {
                 spacing: 32
 
                 NAvatar {
-                    currentUserName: root.currentUserName
+                    imageSource: {
+                        if (!root.usersReady || !root.activeUser) {
+                            return config.DefaultAvatar || "";
+                        }
+
+                        var path = root.activeUser.icon || config.DefaultAvatar || "";
+                        if (path.length > 0 && path.indexOf("/") === 0) {
+                            return "file://" + path;
+                        }
+                        return path;
+                    }
                 }
 
                 ColumnLayout {
                     // User Name
                     NText {
-                        text: "Welcome"
+                        text: {
+                            if (!root.usersReady || !root.activeUser) {
+                                return "Invalid user";
+                            }
+
+                            var name = root.activeUser.realName || root.activeUser.name || "";
+                            return (name !== "") ? "Welcome, " + name : "Invalid user";
+                        }
                         pointSize: Style.fontSizeXXL
                         font.weight: Style.fontWeightMedium
                         color: Color.mOnSurface
@@ -362,44 +424,44 @@ FocusScope {
         Rectangle {
             id: statusBar
 
-            // --- LOGIC ---
-            // property bool hasKeyboard: true
-            property bool hasKeyboard: true //keyboard.layouts.length > 1
-            // Show if at least one status is available (Compact mode check removed as requested)
+            property bool hasKeyboard: keyboard.layouts.length > 1
             visible: hasKeyboard
 
-            // --- POSITIONING ---
-            // Anchored to sit exactly on top of the bottomContainer
             anchors.horizontalCenter: bottomContainer.horizontalCenter
             anchors.bottom: bottomContainer.top
-            anchors.bottomMargin: -Style.radiusL // Overlap slightly to look connected
-            z: -1 // Send behind bottomContainer so the rounded corners look like a tab
+            anchors.bottomMargin: -Style.radiusL
+            z: -1
 
-            // --- SIZE ---
-            height: 30 + Style.radiusL // Add radius to height for the overlap
+            height: 30 + Style.radiusL
             width: (hasKeyboard) ? 120 * Style.uiScaleRatio : 0
 
-            // --- STYLING ---
-            // Only round top corners
             radius: Style.radiusL
             color: Color.mSurface
 
-            // Since we are simulating top-only radius with z-index overlap,
-            // we don't need complex canvas drawing here.
-
             RowLayout {
                 anchors.top: parent.top
-                anchors.topMargin: 10 // Padding from top edge
+                anchors.topMargin: 10
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 16
 
-                // Keyboard Layout Indicator
                 Item {
                     visible: statusBar.hasKeyboard
 
                     Layout.preferredWidth: kbContent.implicitWidth
                     Layout.preferredHeight: kbContent.implicitHeight
 
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            var nextIndex = keyboard.currentLayout + 1;
+                            if (nextIndex >= keyboard.layouts.length) {
+                                nextIndex = 0;
+                            }
+                            console.log("currentLayout kb:", nextIndex);
+                            keyboard.currentLayout = nextIndex;
+                        }
+                    }
                     RowLayout {
                         id: kbContent
                         spacing: 6
@@ -412,27 +474,12 @@ FocusScope {
                         }
 
                         NText {
-                            // Uses SDDM standard property
                             text: keyboard.layouts[keyboard.currentLayout] || "en"
 
                             color: Color.mOnSurfaceVariant
                             pointSize: Style.fontSizeM
                             font.weight: Style.fontWeightMedium
                             elide: Text.ElideRight
-                        }
-
-                        // Optional: Make it clickable to cycle layouts
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                var nextIndex = keyboard.currentLayout + 1;
-                                if (nextIndex >= keyboard.layouts.length) {
-                                    nextIndex = 0;
-                                }
-                                console.log("currentLayout kb:", nextIndex);
-                                keyboard.currentLayout = nextIndex;
-                            }
                         }
                     }
                 }
@@ -444,7 +491,6 @@ FocusScope {
         // ---------------------------------------------------------
         Rectangle {
             id: bottomContainer
-            // Adjust height to fit the extra field
             height: 180
 
             anchors.horizontalCenter: parent.horizontalCenter
@@ -455,7 +501,6 @@ FocusScope {
 
             Component.onCompleted: passwordComponent.forceFocus()
 
-            // Measure text widths to determine minimum button width
             Item {
                 id: buttonRowTextMeasurer
                 visible: false
@@ -505,7 +550,7 @@ FocusScope {
                 spacing: 14
 
                 // -------------------------------------------------
-                // NEW: USER INPUT FIELD
+                // USER INPUT FIELD
                 // -------------------------------------------------
                 RowLayout {
                     id: userComponent
@@ -522,22 +567,19 @@ FocusScope {
                         radius: Style.iRadiusL
                         color: Color.mSurface
 
-                        // Highlight border when focused
                         border.color: userInput.activeFocus ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.3)
                         border.width: userInput.activeFocus ? 2 : 1
 
-                        // MouseArea to ensure clicking anywhere focuses the input
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.IBeamCursor
                             onClicked: userInput.forceActiveFocus()
                         }
 
-                        // The Input Field
                         TextInput {
                             id: userInput
                             anchors.fill: parent
-                            anchors.leftMargin: 50 // Space for the icon
+                            anchors.leftMargin: 50
                             anchors.rightMargin: 18
 
                             text: root.currentUserName
@@ -546,14 +588,15 @@ FocusScope {
                             verticalAlignment: TextInput.AlignVCenter
                             clip: true
 
-                            // Update the main property when user types
-                            onTextEdited: root.currentUserName = text
+                            onTextEdited: {
+                                root.currentUserName = text;
+                                root.activeUser = root.getUser(text);
+                                root.loginErrorMessage = "";
+                            }
 
-                            // On Enter, jump to password field
                             onAccepted: passwordComponent.forceFocus()
                         }
 
-                        // The User Icon
                         NIcon {
                             icon: "user"
                             pointSize: Style.fontSizeL
@@ -577,7 +620,7 @@ FocusScope {
                 }
 
                 // -------------------------------------------------
-                // EXISTING: PASSWORD INPUT
+                // PASSWORD INPUT
                 // -------------------------------------------------
                 RowLayout {
                     id: passwordComponent
@@ -612,7 +655,6 @@ FocusScope {
                             onClicked: passwordInput.forceActiveFocus()
                         }
 
-                        // Icon and Custom Text Visualization
                         Row {
                             anchors.left: parent.left
                             anchors.leftMargin: 18
@@ -626,7 +668,6 @@ FocusScope {
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
-                            // The actual input (Invisible but active)
                             TextInput {
                                 id: passwordInput
                                 width: 0
@@ -640,19 +681,20 @@ FocusScope {
                                 passwordCharacter: "•"
                                 passwordMaskDelay: 0
 
+                                onTextEdited: {
+                                    root.loginErrorMessage = "";
+                                }
+
                                 Keys.onPressed: function (event) {
                                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                                         root.startLogin(text);
                                     }
                                 }
-                                // Focus handled by User Input or Defaults
                             }
 
-                            // Visual representation (Dots/Text/Cursor)
                             Row {
                                 spacing: 0
 
-                                // Cursor Start
                                 Rectangle {
                                     id: cursorStart
                                     width: 2
@@ -674,7 +716,6 @@ FocusScope {
                                     }
                                 }
 
-                                // Dots
                                 Item {
                                     width: Math.min(passwordDisplayContent.width, 550)
                                     height: 20
@@ -697,7 +738,6 @@ FocusScope {
                                     }
                                 }
 
-                                // Actual Text
                                 NText {
                                     text: passwordInput.text
                                     color: Color.mPrimary
@@ -709,7 +749,6 @@ FocusScope {
                                     width: Math.min(implicitWidth, 550)
                                 }
 
-                                // Cursor End
                                 Rectangle {
                                     id: cursorEnd
                                     width: 2
@@ -733,7 +772,6 @@ FocusScope {
                             }
                         }
 
-                        // Eye button
                         Rectangle {
                             anchors.right: submitButton.left
                             anchors.rightMargin: 4
@@ -771,7 +809,6 @@ FocusScope {
                             }
                         }
 
-                        // Submit button
                         Rectangle {
                             id: submitButton
                             anchors.right: parent.right
@@ -925,7 +962,7 @@ FocusScope {
     Connections {
         target: sddm
         function onLoginSucceeded() {
-            consol.log("Login Successful.");
+            console.log("Login Successful.");
         }
         function onLoginFailed() {
             root.loggingIn = false;
