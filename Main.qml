@@ -33,14 +33,10 @@ FocusScope {
         if (usersLoaded !== userModel.count)
             return;
 
-        if (root.currentUserName && root.userMap[root.currentUserName]) {
-            root.activeUser = root.userMap[root.currentUserName];
-        } else {
+        if (!root.currentUserName || !root.userMap[root.currentUserName]) {
             var firstKey = Object.keys(root.userMap)[0];
-            if (firstKey) {
+            if (firstKey)
                 root.currentUserName = firstKey;
-                root.activeUser = root.userMap[firstKey];
-            }
         }
     }
     Component.onCompleted: {
@@ -54,14 +50,19 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
-    onCurrentUserNameChanged: {
-        // When currentUserName changes (including initial binding to lastUser),
-        // update activeUser if that user is already loaded
-        if (currentUserName && userMap[currentUserName]) {
-            activeUser = userMap[currentUserName];
-        }
+
+    property var activeUser: {
+        // Force reevaluation when delegates register
+        var _ = root.usersLoaded;
+
+        if (!root.currentUserName)
+            return null;
+        if (!root.userMap)
+            return null;
+
+        return root.userMap[root.currentUserName] || null;
     }
-    property var activeUser: null
+
     property var userMap: ({})
     function getUser(username) {
         if (root.userMap && root.userMap[username]) {
@@ -638,7 +639,6 @@ FocusScope {
                             // Update the main property when user types
                             onTextEdited: {
                                 root.currentUserName = text;
-                                root.activeUser = root.userMap[text] || null;
                                 root.loginErrorMessage = "";
                             }
 
