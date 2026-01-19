@@ -103,24 +103,30 @@ update_sddm_config() {
 
 list_backups() {
     print_info "Checking for backups..."
-    local backup_dirs=(/usr/share/sddm/themes/${THEME_NAME}.backup-*)
+    local backup_pattern="/usr/share/sddm/themes/${THEME_NAME}.backup-*"
+    local found_backups=()
     
-    if [[ -d "${backup_dirs[0]}" ]]; then
+    # Safely collect existing backup directories
+    shopt -s nullglob
+    for dir in $backup_pattern; do
+        if [[ -d "$dir" ]]; then
+            found_backups+=("$dir")
+        fi
+    done
+    shopt -u nullglob
+    
+    if [[ ${#found_backups[@]} -gt 0 ]]; then
         print_info "Found backup directories:"
-        for dir in "${backup_dirs[@]}"; do
-            if [[ -d "$dir" ]]; then
-                print_info "  - $dir"
-            fi
+        for dir in "${found_backups[@]}"; do
+            print_info "  - $dir"
         done
         echo ""
         read -p "Would you like to remove all backup directories? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            for dir in "${backup_dirs[@]}"; do
-                if [[ -d "$dir" ]]; then
-                    rm -rf "$dir"
-                    print_success "Removed $dir"
-                fi
+            for dir in "${found_backups[@]}"; do
+                rm -rf "$dir"
+                print_success "Removed $dir"
             done
         fi
     fi

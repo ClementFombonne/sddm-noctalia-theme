@@ -57,10 +57,13 @@ check_sddm() {
 
 check_qt6() {
     print_info "Checking for Qt6 support..."
-    if command -v qmake6 &> /dev/null || command -v qmake &> /dev/null; then
-        print_success "Qt6 appears to be available"
+    # Check for Qt6 libraries (more reliable than checking development tools)
+    if ldconfig -p 2>/dev/null | grep -q "libQt6Core" || \
+       [[ -d /usr/lib/qt6 ]] || [[ -d /usr/lib64/qt6 ]] || \
+       [[ -d /usr/lib/x86_64-linux-gnu/qt6 ]]; then
+        print_success "Qt6 libraries detected"
     else
-        print_warning "Qt6 development tools not detected"
+        print_warning "Qt6 libraries not detected in common locations"
         print_warning "This theme requires SDDM compiled with Qt6 support"
         print_warning "Please ensure your SDDM installation supports Qt6"
     fi
@@ -71,7 +74,8 @@ backup_existing() {
         print_warning "Existing installation found at $INSTALL_DIR"
         local backup_dir="${INSTALL_DIR}${BACKUP_SUFFIX}"
         print_info "Creating backup at $backup_dir"
-        mv "$INSTALL_DIR" "$backup_dir"
+        cp -r "$INSTALL_DIR" "$backup_dir"
+        rm -rf "$INSTALL_DIR"
         print_success "Backup created"
     fi
 }
@@ -82,12 +86,17 @@ install_theme() {
     # Create parent directory if it doesn't exist
     mkdir -p "$(dirname "$INSTALL_DIR")"
     
-    # Copy theme files
-    cp -r "$SCRIPT_DIR" "$INSTALL_DIR"
+    # Create theme directory
+    mkdir -p "$INSTALL_DIR"
     
-    # Remove git files and installation scripts from the installation
-    rm -rf "$INSTALL_DIR/.git" "$INSTALL_DIR/.gitignore"
-    rm -f "$INSTALL_DIR/install.sh" "$INSTALL_DIR/uninstall.sh"
+    # Copy theme files, excluding git and installation scripts
+    cp -r "$SCRIPT_DIR"/{Assets,Commons,Helpers,Widgets,*.qml,*.desktop,qmldir} "$INSTALL_DIR/" 2>/dev/null || {
+        # Fallback: copy everything then remove unwanted files
+        cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
+        rm -rf "$INSTALL_DIR/.git" "$INSTALL_DIR/.gitignore"
+        rm -f "$INSTALL_DIR/install.sh" "$INSTALL_DIR/uninstall.sh" "$INSTALL_DIR/INSTALL.md"
+        rm -f "$INSTALL_DIR/flake.nix" "$INSTALL_DIR/flake.lock"
+    }
     
     # Set proper permissions
     chown -R root:root "$INSTALL_DIR"
@@ -121,12 +130,14 @@ configure_sddm() {
             cp /etc/sddm.conf /etc/sddm.conf.backup-$(date +%Y%m%d-%H%M%S)
             print_success "Created backup of /etc/sddm.conf"
             
-            # Update or add Theme section
+            # Update or add Theme section with safer sed approach
             if grep -q "^\[Theme\]" /etc/sddm.conf; then
-                # Theme section exists, update Current value
-                sed -i '/^\[Theme\]/,/^\[/ s/^Current=.*/Current='"${THEME_NAME}"'/' /etc/sddm.conf
-                # If Current doesn't exist in Theme section, add it
-                if ! grep -A5 "^\[Theme\]" /etc/sddm.conf | grep -q "^Current="; then
+                # Check if Current exists in Theme section
+                if sed -n '/^\[Theme\]/,/^\[/p' /etc/sddm.conf | grep -q "^Current="; then
+                    # Update existing Current line
+                    sed -i '/^\[Theme\]/,/^\[/ { /^Current=/ s/^Current=.*/Current='"${THEME_NAME}"'/; }' /etc/sddm.conf
+                else
+                    # Add Current line after [Theme] line
                     sed -i '/^\[Theme\]/a Current='"${THEME_NAME}" /etc/sddm.conf
                 fi
             else
