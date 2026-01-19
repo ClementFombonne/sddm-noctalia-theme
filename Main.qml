@@ -450,6 +450,18 @@ FocusScope {
                     Layout.preferredWidth: kbContent.implicitWidth
                     Layout.preferredHeight: kbContent.implicitHeight
 
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            var nextIndex = keyboard.currentLayout + 1;
+                            if (nextIndex >= keyboard.layouts.length) {
+                                nextIndex = 0;
+                            }
+                            console.log("currentLayout kb:", nextIndex);
+                            keyboard.currentLayout = nextIndex;
+                        }
+                    }
                     RowLayout {
                         id: kbContent
                         spacing: 6
@@ -468,19 +480,6 @@ FocusScope {
                             pointSize: Style.fontSizeM
                             font.weight: Style.fontWeightMedium
                             elide: Text.ElideRight
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                var nextIndex = keyboard.currentLayout + 1;
-                                if (nextIndex >= keyboard.layouts.length) {
-                                    nextIndex = 0;
-                                }
-                                console.log("currentLayout kb:", nextIndex);
-                                keyboard.currentLayout = nextIndex;
-                            }
                         }
                     }
                 }
