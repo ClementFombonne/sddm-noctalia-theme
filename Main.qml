@@ -57,13 +57,6 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
-    onCurrentUserNameChanged: {
-        // Update activeUser immediately when currentUserName changes
-        // This fixes the race condition where lastUser is set before users are loaded
-        if (currentUserName && userMap[currentUserName]) {
-            activeUser = userMap[currentUserName];
-        }
-    }
     property var activeUser: null
     property var userMap: ({})
     function getUser(username) {
