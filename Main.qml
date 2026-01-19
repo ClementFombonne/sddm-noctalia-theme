@@ -30,15 +30,20 @@ FocusScope {
     //     }
     // }
     onUsersLoadedChanged: {
-        if (usersLoaded === userModel.count) {
-            if (userModel.lastUser && root.userMap[userModel.lastUser]) {
-                root.currentUserName = userModel.lastUser;
-                root.activeUser = root.userMap[userModel.lastUser];
-            } else if (userModel.count > 0) {
-                var firstUser = userModel.get(0);
-                root.currentUserName = firstUser.name;
-                root.activeUser = root.userMap[firstUser.name];
-            }
+        if (usersLoaded !== userModel.count)
+            return;
+
+        // Prefer last user if valid
+        if (root.currentUserName && root.userMap[root.currentUserName]) {
+            root.activeUser = root.userMap[root.currentUserName];
+            return;
+        }
+
+        // Otherwise select first loaded user deterministically
+        var firstKey = Object.keys(root.userMap)[0];
+        if (firstKey) {
+            root.currentUserName = firstKey;
+            root.activeUser = root.userMap[firstKey];
         }
     }
     Component.onCompleted: {
@@ -988,17 +993,6 @@ FocusScope {
     // ---------------------------------------------------------
     // 4. SIGNALS (Error Handling)
     // ---------------------------------------------------------
-    Connections {
-        target: userModel
-        function onLastUserChanged() {
-            if (root.usersLoaded === userModel.count && userModel.lastUser) {
-                if (root.userMap[userModel.lastUser]) {
-                    root.currentUserName = userModel.lastUser;
-                    root.activeUser = root.userMap[userModel.lastUser];
-                }
-            }
-        }
-    }
     Connections {
         target: sddm
         function onLoginSucceeded() {
