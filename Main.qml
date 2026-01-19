@@ -33,17 +33,14 @@ FocusScope {
         if (usersLoaded !== userModel.count)
             return;
 
-        // Prefer last user if valid
         if (root.currentUserName && root.userMap[root.currentUserName]) {
             root.activeUser = root.userMap[root.currentUserName];
-            return;
-        }
-
-        // Otherwise select first loaded user deterministically
-        var firstKey = Object.keys(root.userMap)[0];
-        if (firstKey) {
-            root.currentUserName = firstKey;
-            root.activeUser = root.userMap[firstKey];
+        } else {
+            var firstKey = Object.keys(root.userMap)[0];
+            if (firstKey) {
+                root.currentUserName = firstKey;
+                root.activeUser = root.userMap[firstKey];
+            }
         }
     }
     Component.onCompleted: {
@@ -72,29 +69,44 @@ FocusScope {
         }
         return null;
     }
+    // Repeater {
+    //     model: userModel
+    //     delegate: Item {
+    //         Component.onCompleted: {
+    //             var userData = {
+    //                 "name": name,
+    //                 "realName": realName,
+    //                 "icon": icon
+    //             };
+    //             root.userMap[name] = userData;
+    //             root.usersLoaded++;
+    //
+    //             // Set activeUser immediately if this is the currentUserName (from lastUser)
+    //             // This fixes the race condition where lastUser is set but activeUser is null
+    //             if (name === root.currentUserName) {
+    //                 root.activeUser = userData;
+    //             }
+    //
+    //             if (index === 0 && root.currentUserName === "") {
+    //                 console.log("lastUser was empty. Auto-selecting first user:", name);
+    //                 root.currentUserName = name;
+    //                 root.activeUser = userData; // Update object too
+    //             }
+    //         }
+    //     }
+    // }
     Repeater {
         model: userModel
         delegate: Item {
+            id: userDelegate
+
+            property string uName: name
+            property string uRealName: realName
+            property string uIcon: icon
+
             Component.onCompleted: {
-                var userData = {
-                    "name": name,
-                    "realName": realName,
-                    "icon": icon
-                };
-                root.userMap[name] = userData;
+                root.userMap[uName] = userDelegate;
                 root.usersLoaded++;
-
-                // Set activeUser immediately if this is the currentUserName (from lastUser)
-                // This fixes the race condition where lastUser is set but activeUser is null
-                if (name === root.currentUserName) {
-                    root.activeUser = userData;
-                }
-
-                if (index === 0 && root.currentUserName === "") {
-                    console.log("lastUser was empty. Auto-selecting first user:", name);
-                    root.currentUserName = name;
-                    root.activeUser = userData; // Update object too
-                }
             }
         }
     }
@@ -336,7 +348,7 @@ FocusScope {
 
                 NAvatar {
                     imageSource: {
-                        var path = (root.activeUser && root.activeUser.icon) ? root.activeUser.icon : (config.DefaultAvatar || "");
+                        var path = (root.activeUser && root.activeUser.uIcon) ? root.activeUser.uIcon : (config.DefaultAvatar || "");
 
                         if (path.length > 0 && path.indexOf("/") === 0) {
                             return "file://" + path;
@@ -350,10 +362,10 @@ FocusScope {
                     NText {
                         text: {
                             var name = "";
-                            if (root.activeUser && root.activeUser.name)
-                                name = root.activeUser.name;
-                            if (root.activeUser && root.activeUser.realName)
-                                name = root.activeUser.realName;
+                            if (root.activeUser && root.activeUser.uRealName)
+                                name = root.activeUser.uRealName;
+                            else if (root.activeUser && root.activeUser.uName)
+                                name = root.activeUser.uName;
                             return (name != "") ? "Welcome, " + name : "Invalid user";
                         }
                         pointSize: Style.fontSizeXXL
@@ -626,7 +638,7 @@ FocusScope {
                             // Update the main property when user types
                             onTextEdited: {
                                 root.currentUserName = text;
-                                root.activeUser = root.getUser(text);
+                                root.activeUser = root.userMap[text] || null;
                                 root.loginErrorMessage = "";
                             }
 
