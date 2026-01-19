@@ -89,14 +89,19 @@ install_theme() {
     # Create theme directory
     mkdir -p "$INSTALL_DIR"
     
-    # Copy theme files, excluding git and installation scripts
-    cp -r "$SCRIPT_DIR"/{Assets,Commons,Helpers,Widgets,*.qml,*.desktop,qmldir} "$INSTALL_DIR/" 2>/dev/null || {
-        # Fallback: copy everything then remove unwanted files
-        cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
-        rm -rf "$INSTALL_DIR/.git" "$INSTALL_DIR/.gitignore"
-        rm -f "$INSTALL_DIR/install.sh" "$INSTALL_DIR/uninstall.sh" "$INSTALL_DIR/INSTALL.md"
-        rm -f "$INSTALL_DIR/flake.nix" "$INSTALL_DIR/flake.lock"
-    }
+    # Copy theme files selectively
+    for item in Assets Commons Helpers Widgets Main.qml metadata.desktop qmldir; do
+        if [[ -e "$SCRIPT_DIR/$item" ]]; then
+            cp -r "$SCRIPT_DIR/$item" "$INSTALL_DIR/"
+        fi
+    done
+    
+    # Verify essential files were copied
+    if [[ ! -f "$INSTALL_DIR/Main.qml" ]] || [[ ! -d "$INSTALL_DIR/Commons" ]]; then
+        print_error "Failed to copy essential theme files"
+        rm -rf "$INSTALL_DIR"
+        exit 1
+    fi
     
     # Set proper permissions
     chown -R root:root "$INSTALL_DIR"
@@ -130,15 +135,15 @@ configure_sddm() {
             cp /etc/sddm.conf /etc/sddm.conf.backup-$(date +%Y%m%d-%H%M%S)
             print_success "Created backup of /etc/sddm.conf"
             
-            # Update or add Theme section with safer sed approach
+            # Update or add Theme section with safer approach
             if grep -q "^\[Theme\]" /etc/sddm.conf; then
                 # Check if Current exists in Theme section
                 if sed -n '/^\[Theme\]/,/^\[/p' /etc/sddm.conf | grep -q "^Current="; then
-                    # Update existing Current line
-                    sed -i '/^\[Theme\]/,/^\[/ { /^Current=/ s/^Current=.*/Current='"${THEME_NAME}"'/; }' /etc/sddm.conf
+                    # Update existing Current line using double quotes for variable expansion
+                    sed -i "/^\[Theme\]/,/^\[/ { /^Current=/ s|^Current=.*|Current=${THEME_NAME}|; }" /etc/sddm.conf
                 else
                     # Add Current line after [Theme] line
-                    sed -i '/^\[Theme\]/a Current='"${THEME_NAME}" /etc/sddm.conf
+                    sed -i "/^\[Theme\]/a Current=${THEME_NAME}" /etc/sddm.conf
                 fi
             else
                 # Theme section doesn't exist, add it
