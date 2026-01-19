@@ -15,17 +15,29 @@ FocusScope {
     property int currentSessionIndex: 0
     property int usersLoaded: 0
 
+    // onUsersLoadedChanged: {
+    //     if (usersLoaded === userModel.count) {
+    //         // This logic now runs only after the Repeater has finished.
+    //         if (root.currentUserName && root.userMap[root.currentUserName]) {
+    //             root.activeUser = root.userMap[root.currentUserName];
+    //         } else if (userModel.count > 0) {
+    //             var firstUser = userModel.get(0);
+    //             if (firstUser && root.userMap[firstUser.name]) {
+    //                 root.currentUserName = firstUser.name;
+    //                 root.activeUser = root.userMap[firstUser.name];
+    //             }
+    //         }
+    //     }
+    // }
     onUsersLoadedChanged: {
         if (usersLoaded === userModel.count) {
-            // This logic now runs only after the Repeater has finished.
-            if (root.currentUserName && root.userMap[root.currentUserName]) {
-                root.activeUser = root.userMap[root.currentUserName];
+            if (userModel.lastUser && root.userMap[userModel.lastUser]) {
+                root.currentUserName = userModel.lastUser;
+                root.activeUser = root.userMap[userModel.lastUser];
             } else if (userModel.count > 0) {
                 var firstUser = userModel.get(0);
-                if (firstUser && root.userMap[firstUser.name]) {
-                    root.currentUserName = firstUser.name;
-                    root.activeUser = root.userMap[firstUser.name];
-                }
+                root.currentUserName = firstUser.name;
+                root.activeUser = root.userMap[firstUser.name];
             }
         }
     }
@@ -69,7 +81,6 @@ FocusScope {
         }
     }
 
-    
     function startLogin(password) {
         if (password == "") {
             console.log("Error: Password is empty");
@@ -977,6 +988,17 @@ FocusScope {
     // ---------------------------------------------------------
     // 4. SIGNALS (Error Handling)
     // ---------------------------------------------------------
+    Connections {
+        target: userModel
+        function onLastUserChanged() {
+            if (root.usersLoaded === userModel.count && userModel.lastUser) {
+                if (root.userMap[userModel.lastUser]) {
+                    root.currentUserName = userModel.lastUser;
+                    root.activeUser = root.userMap[userModel.lastUser];
+                }
+            }
+        }
+    }
     Connections {
         target: sddm
         function onLoginSucceeded() {
