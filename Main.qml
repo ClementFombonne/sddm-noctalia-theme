@@ -57,6 +57,13 @@ FocusScope {
     property bool loggingIn: false
 
     property string currentUserName: userModel.lastUser
+    onCurrentUserNameChanged: {
+        // Update activeUser immediately when currentUserName changes
+        // This fixes the race condition where lastUser is set before users are loaded
+        if (currentUserName && userMap[currentUserName]) {
+            activeUser = userMap[currentUserName];
+        }
+    }
     property var activeUser: null
     property var userMap: ({})
     function getUser(username) {
@@ -76,6 +83,12 @@ FocusScope {
                 };
                 root.userMap[name] = userData;
                 root.usersLoaded++;
+
+                // Set activeUser immediately if this is the currentUserName (from lastUser)
+                // This fixes the race condition where lastUser is set but activeUser is null
+                if (name === root.currentUserName) {
+                    root.activeUser = userData;
+                }
 
                 if (index === 0 && root.currentUserName === "") {
                     console.log("lastUser was empty. Auto-selecting first user:", name);
