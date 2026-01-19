@@ -346,7 +346,7 @@ FocusScope {
                     NText {
                         text: {
                             if (!root.usersReady || !root.activeUser) {
-                                return "Loading...";
+                                return "Invalid user";
                             }
 
                             var name = root.activeUser.realName || root.activeUser.name || "";
@@ -974,7 +974,7 @@ FocusScope {
     Connections {
         target: sddm
         function onLoginSucceeded() {
-            consol.log("Login Successful.");
+            console.log("Login Successful.");
         }
         function onLoginFailed() {
             root.loggingIn = false;
