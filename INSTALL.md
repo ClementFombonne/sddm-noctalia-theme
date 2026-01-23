@@ -225,7 +225,23 @@ In your `configuration.nix` (or other configuration module) add:
 
 ### 3. Configure SDDM and the theme
 
-The theme comes with some customization that can be enabled through nix.
+**SDDM**: The SDDM can still be configured using the standard nix way. However you should
+not try to disable sddm or overwrite the theme option as it might break the flake.
+```nix
+{
+  services.displayManager.sddm = { 
+    enableHidpi = true;
+    wayland.enable = false; # the X11 version of sddm often yield better result.
+    noctalia = {
+        enable = true;
+        background = ../../assets/wallpaper.png; # relative to the configuration file location
+        colorScheme = "Catppuccin";
+    }
+  }
+}
+```
+
+**Theme**: The theme comes with some customization that can be enabled through nix.
 To enable an option simply add:
 ```nix
 {
