@@ -188,7 +188,56 @@ sudo cat /var/log/sddm.log
 
 ## NixOS Users
 
-For NixOS, use the NixOS module instead of these scripts. See the main [README.md](README.md) for details.
+For NixOS, you can use the flake provided in the repository.
+
+### 1. Add the flake to your inputs
+
+In your `flake.nix` add:
+```nix
+{
+  inputs = {
+    # ... other inputs
+    noctalia.url = "github:ClementFombonne/sddm-noctalia-theme";
+  };
+
+  outputs = { self, nixpkgs, noctalia, ... }: {
+    nixosConfigurations.myHost = nixpkgs.lib.nixosSystem {
+      modules = [
+        ./configuration.nix
+        noctalia.nixosModules.default
+      ];
+    };
+  };
+}
+```
+
+### 2. Enable the theme in your configuration
+
+In your `configuration.nix` (or other configuration module) add:
+```nix
+{
+  services.displayManager.sddm.noctalia = {
+    enable = true;
+  };
+}
+```
+> No need to enable sddm manually, the module does it for you.
+
+### 3. Configure SDDM and the theme
+
+The theme comes with some customization that can be enabled through nix.
+To enable an option simply add:
+```nix
+{
+  services.displayManager.sddm.noctalia = {
+    enable = true;
+    background = ../../assets/wallpaper.png; # relative to the configuration file location
+    colorScheme = "Catppuccin";
+  }
+}
+```
+
+See the main [README.md](README.md) for more configuration options.
 
 ## Support
 
