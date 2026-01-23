@@ -188,7 +188,7 @@ sudo systemctl restart sddm
 
 ### NixOS
 
-Managing SDDM configuration can sometimes be tricky for nixos user.
+Managing SDDM configuration can sometimes be tricky for NixOS users.
 If you want a nixos module example you can go check my [nixos config](https://github.com/ClementFombonne/nix-config/blob/main/modules/gui/noctalia-sddm/default.nix)
 
 ## Dependencies

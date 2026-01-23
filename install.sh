@@ -57,7 +57,9 @@ check_sddm() {
 
 check_qt6() {
     print_info "Checking for Qt6 support..."
-    # Check for Qt6 libraries (more reliable than checking development tools)
+    # Check for Qt6 libraries (more reliable than checking development tools).
+    # Note: `ldconfig -p` may not be available or may require special permissions on some systems.
+    # In that case, this check will effectively be skipped and the directory checks below act as a fallback.
     if ldconfig -p 2>/dev/null | grep -q "libQt6Core" || \
        [[ -d /usr/lib/qt6 ]] || [[ -d /usr/lib64/qt6 ]] || \
        [[ -d /usr/lib/x86_64-linux-gnu/qt6 ]]; then
@@ -91,7 +93,7 @@ install_theme() {
     
     # Copy theme files selectively
     # Note: This list should be updated if new essential files/directories are added to the theme
-    for item in Assets Commons Helpers Widgets Main.qml metadata.desktop qmldir; do
+    for item in Assets Commons Helpers Widgets Main.qml metadata.desktop qmldir LICENSE; do
         if [[ -e "$SCRIPT_DIR/$item" ]]; then
             cp -r "$SCRIPT_DIR/$item" "$INSTALL_DIR/"
         fi

@@ -16,8 +16,9 @@
           name = "noctalia-sddm-base";
           src = lib.cleanSource ./.;
           installPhase = ''
-            mkdir -p $out/share/sddm/themes/noctalia-sddm
-            cp -r * $out/share/sddm/themes/noctalia-sddm
+            mkdir -p "$out/share/sddm/themes/noctalia-sddm"
+            cp -r Assets Commons Helpers Widgets Main.qml metadata.desktop qmldir \
+              "$out/share/sddm/themes/noctalia-sddm"
           '';
         }
       ) { };

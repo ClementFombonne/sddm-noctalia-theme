@@ -231,7 +231,7 @@ not try to disable sddm or overwrite the theme option as it might break the flak
 {
   services.displayManager.sddm = { 
     enableHidpi = true;
-    wayland.enable = false; # the X11 version of sddm often yield better result.
+    wayland.enable = false; # the X11 version of sddm often yields better result.
     noctalia = {
         enable = true;
         background = ../../assets/wallpaper.png; # relative to the configuration file location

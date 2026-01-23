@@ -92,26 +92,32 @@ in
       font = mkOption {
         type = types.float;
         default = 1.0;
+        description = "Scale factor applied to interface font sizes.";
       };
       radius = mkOption {
         type = types.float;
         default = 1.0;
+        description = "Global scale factor for rounded corner radius of UI elements.";
       };
       iRadius = mkOption {
         type = types.float;
         default = 1.0;
+        description = "Scale factor for inner radii, such as internal borders or shapes.";
       };
       screenRadius = mkOption {
         type = types.float;
         default = 1.0;
+        description = "Scale factor for corner radius relative to the screen edges.";
       };
       scale = mkOption {
         type = types.float;
         default = 1.0;
+        description = "Overall UI scaling multiplier for the theme components.";
       };
       animationSpeed = mkOption {
         type = types.float;
         default = 1.0;
+        description = "Multiplier for animation speed (values > 1.0 are faster, < 1.0 are slower).";
       };
     };
 
@@ -148,7 +154,8 @@ in
 
         installPhase = ''
           mkdir -p $out/share/sddm/themes/noctalia-sddm
-          cp -r * $out/share/sddm/themes/noctalia-sddm
+          cp -r Assets Commons Helpers Widgets $out/share/sddm/themes/noctalia-sddm
+          cp Main.qml metadata.desktop qmldir $out/share/sddm/themes/noctalia-sddm
 
           # Copy custom background if provided
           ${lib.optionalString (cfg.background != null) ''
