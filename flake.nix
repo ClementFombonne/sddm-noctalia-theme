@@ -8,7 +8,7 @@
   outputs =
     { self, nixpkgs, ... }:
     {
-      nixosModules.default = import ./nix/module.nix;
+      nixosModules.default = import ./nix/nixos-module.nix;
 
       packages.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.callPackage (
         { stdenv, lib }:
